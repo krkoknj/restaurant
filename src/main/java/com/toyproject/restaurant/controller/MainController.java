@@ -12,6 +12,8 @@ public class MainController {
     @GetMapping(value = "/home")
     public String main(HttpServletRequest request) {
         log.info("========================");
+
+        log.info("=======================2=");
         return "page/home";
     }
 }
