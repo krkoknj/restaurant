@@ -7,28 +7,42 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
-@RequestMapping("/join")
 @RequiredArgsConstructor
-public class JoinController {
+public class LoginController {
 
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final UserRepository userRepository;
 
-    @GetMapping("")
+    @GetMapping("/user")
+    public @ResponseBody String user(Model model) {
+        return "user";
+    }
+
+    @GetMapping("/join")
     public String join(Model model) {
         return "/page/join";
+    }
+
+    @GetMapping("/login")
+    public String login(Model model) {
+        return "/page/login";
     }
 
     @PostMapping("/joinProc")
     public String joinProc(UserDto userDto) {
         String rawPassword = userDto.getPassword();
-        String encodePassword = bCryptPasswordEncoder.encode(rawPassword);
+        String encPassword = bCryptPasswordEncoder.encode(rawPassword);
+        userDto.setPassword(encPassword);
         userDto.setRole("ROLE_USER");
         User user = User.toEntity(userDto);
         userRepository.save(user);
-        return "redirect:/";
+        return "redirect:/home";
     }
+
 }

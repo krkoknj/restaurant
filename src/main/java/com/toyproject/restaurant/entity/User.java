@@ -18,6 +18,7 @@ public class User {
     private String username;
     private String password;
     private String role;
+    private String email;
 
     public static User toEntity(UserDto dto) {
         return User.builder()
@@ -25,6 +26,7 @@ public class User {
                 .username(dto.getUsername())
                 .password(dto.getPassword())
                 .role(dto.getRole())
+                .email(dto.getEmail())
                 .build();
     }
 

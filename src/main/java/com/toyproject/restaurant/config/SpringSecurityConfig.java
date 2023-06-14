@@ -33,21 +33,34 @@ public class SpringSecurityConfig {
 
                 //CSRF 공격에 대한 방어를 해제.
                 //https://stir.tistory.com/265
+//        return http.csrf().disable()
+//                //URI에 따른 페이지에 대한 권한을 부여하기 위해 시작하는 메소드 입니다. 아래의 antMatchers 기능을 이용하기 위한 메소드라고 보면 됩니다.
+//                .authorizeRequests()
+//                // h2 사용
+//                .antMatchers("/h2-console/**").permitAll()
+//                .antMatchers("/user/**").authenticated()
+//                .antMatchers("/admin/**").access("hasRole(ROLE_ADMIN)")
+//                .anyRequest().permitAll()
+//                // h2 사용
+//                .and().headers().frameOptions().sameOrigin()
+//                .and()
+//                .formLogin()
+//                .loginPage("/login")
+//                .loginProcessingUrl("/loginProc")
+//                .defaultSuccessUrl("/home")
+//                .and().build();
+
         return http.csrf().disable()
-                //URI에 따른 페이지에 대한 권한을 부여하기 위해 시작하는 메소드 입니다. 아래의 antMatchers 기능을 이용하기 위한 메소드라고 보면 됩니다.
                 .authorizeRequests()
-                // h2 사용
-                .antMatchers("/h2-console/**").permitAll()
+                // authenticated()를 사용하면 해당 URI는 인증이 필요한 URI라고 명시
                 .antMatchers("/user/**").authenticated()
-                .antMatchers("/admin/**").access("hasRole(ROLE_ADMIN)")
+                .antMatchers("/admin/**").access("hasRole('ROLE_ADMIN')")
                 .anyRequest().permitAll()
-                // h2 사용
-                .and().headers().frameOptions().sameOrigin()
                 .and()
                 .formLogin()
                 .loginPage("/login")
                 .loginProcessingUrl("/loginProc")
-                .defaultSuccessUrl("/")
+                .defaultSuccessUrl("/home")
                 .and().build();
     }
 
