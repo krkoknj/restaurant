@@ -20,8 +20,8 @@ public class LoginController {
     private final UserRepository userRepository;
 
     @GetMapping("/user")
-    public @ResponseBody String user(Model model) {
-        return "user";
+    public String user(Model model) {
+        return "page/user/calendar";
     }
 
     @GetMapping("/join")
