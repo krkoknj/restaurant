@@ -1,74 +1,65 @@
 package com.toyproject.restaurant.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SpringSecurityConfig {
 
-//    @Override
-//    public void configure(WebSecurity web) throws Exception {
-//        // static 디렉터리의 하위 파일 목록은 인증 무시 ( = 항상통과 )
-//        web.ignoring().antMatchers("/css/**", "/js/**", "/image/**", "/lib/**");
-//    }
-//
-//    @Override
-//    protected void configure(HttpSecurity http) throws Exception {
-//        http.authorizeRequests()
-//                .antMatchers("/admin/**").hasRole("ADMIN")
-//                .antMatchers("/**").permitAll();
-//    }
-
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
-                //CSRF 공격에 대한 방어를 해제.
-                //https://stir.tistory.com/265
-//        return http.csrf().disable()
-//                //URI에 따른 페이지에 대한 권한을 부여하기 위해 시작하는 메소드 입니다. 아래의 antMatchers 기능을 이용하기 위한 메소드라고 보면 됩니다.
-//                .authorizeRequests()
-//                // h2 사용
-//                .antMatchers("/h2-console/**").permitAll()
-//                .antMatchers("/user/**").authenticated()
-//                .antMatchers("/admin/**").access("hasRole(ROLE_ADMIN)")
-//                .anyRequest().permitAll()
-//                // h2 사용
-//                .and().headers().frameOptions().sameOrigin()
-//                .and()
-//                .formLogin()
-//                .loginPage("/login")
-//                .loginProcessingUrl("/loginProc")
-//                .defaultSuccessUrl("/home")
-//                .and().build();
-
-        return http.csrf().disable()
-                .authorizeRequests()
-                // authenticated()를 사용하면 해당 URI는 인증이 필요한 URI라고 명시
-                .antMatchers("/user/**").authenticated()
-                .antMatchers("/admin/**").access("hasRole('ROLE_ADMIN')")
-                .anyRequest().permitAll()
-                .and()
-                .formLogin()
-                .loginPage("/login")
-                .loginProcessingUrl("/loginProc")
-                .defaultSuccessUrl("/home")
-                .and().build();
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
-    /*
-        BCryptPasswordEncoder 클래스를 Bean으로 등록해서 Controller에 의존성 주입
-     */
     @Bean
-    public BCryptPasswordEncoder bCryptPasswordEncoder() {
-        return new BCryptPasswordEncoder();
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        // 정적 리소스들이 보안필터를 거치지 않게끔
+        return (web) -> web.ignoring().antMatchers("/css/**", "/js/**", "/img/**", "/font/**");
+    }
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http.cors().disable() // cors 방지
+                .csrf().disable() // csrf 방지
+                .headers().frameOptions().disable();
+
+        http.authorizeRequests()
+                // 페이지 권한 설정
+                .antMatchers("/member/**").hasRole("USER")
+                .antMatchers("/board/**").hasRole("USER")
+                .antMatchers("/login", "/signup").anonymous() // 익명 사용자 허용
+                .anyRequest().permitAll();
+
+        http.formLogin()
+                .loginPage("/loginForm")
+                .loginProcessingUrl("/login")
+                .defaultSuccessUrl("/")
+                .failureUrl("/login?error=true")
+                .usernameParameter("email")
+                .passwordParameter("password")
+                .and()
+                .logout()
+                .logoutSuccessUrl("/")
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID");
+
+        // status code 핸들링
+        http.exceptionHandling()
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.sendRedirect("/login");
+                })
+                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                    response.sendRedirect("/denied");
+                });
+
+        return http.build();
     }
 }

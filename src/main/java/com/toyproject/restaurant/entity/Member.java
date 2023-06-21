@@ -1,9 +1,7 @@
 package com.toyproject.restaurant.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.toyproject.restaurant.entity.domain.Role;
+import lombok.*;
 
 import javax.persistence.*;
 
@@ -27,4 +25,8 @@ public class Member {
 
     @Column(nullable = false)
     private String password;
+
+    @Column
+    @Enumerated(EnumType.STRING)
+    private Role role;
 }
