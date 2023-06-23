@@ -10,17 +10,16 @@
 <div layout:fragment="content" class="container">
   <form method="post">
     <div class="form-group">
-      <label class="form-label mt-4">회원가입</label>
       <div class="form-floating mb-3">
-        <input type="email" name="email" class="form-control" id="floatingInput" placeholder="name@example.com" th:value="${member.email}">
-        <label for="floatingInput" th:text="${member.email}">Email address</label>
+        <input readonly type="email" name="email" class="form-control" id="floatingInput" placeholder="name@example.com" th:value="${member.email}">
+        <label for="floatingInput">Email address</label>
       </div>
       <div class="form-floating mb-3">
         <input type="text" name="username" class="form-control" id="floatingUsername" placeholder="홍길동" th:value="${member.username}">
-        <label for="floatingInput" th:text="${member.username}">User name</label>
+        <label for="floatingInput">User name</label>
       </div>
     </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <button type="submit" class="btn btn-primary">Update</button>
   </form>
 </div>
 </body>

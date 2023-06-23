@@ -54,9 +54,11 @@ public class SpringSecurityConfig {
         // status code 핸들링
         http.exceptionHandling()
                 .authenticationEntryPoint((request, response, authException) -> {
+                    System.out.println("authException = " + authException);
                     response.sendRedirect("/login");
                 })
                 .accessDeniedHandler((request, response, accessDeniedException) -> {
+                    System.out.println("accessDeniedException = " + accessDeniedException);
                     response.sendRedirect("/denied");
                 });
 

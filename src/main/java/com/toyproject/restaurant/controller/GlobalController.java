@@ -4,6 +4,7 @@ import com.toyproject.restaurant.dto.MemberRequestDto;
 import com.toyproject.restaurant.service.MemberService;
 import com.toyproject.restaurant.vaildator.CheckEmailValidator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
@@ -17,6 +18,7 @@ import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
+@Slf4j
 public class GlobalController {
 
     private final MemberService memberService;
@@ -48,7 +50,7 @@ public class GlobalController {
 
     @GetMapping("/signup")
     public String signup() {
-        return "members/memberForm";
+        return "member/memberForm";
     }
 
     /**
@@ -69,10 +71,9 @@ public class GlobalController {
             }
 
             // 회원 가입 페이지로 리턴
-            return "members/memberForm";
+            return "member/memberForm";
         }
 
-        // 유효성 검사를 통과하지 못한 필드와 메세지 핸들링
 
 
         Long memberId = memberService.join(memberRequestDto);

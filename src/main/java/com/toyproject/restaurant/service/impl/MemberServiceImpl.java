@@ -1,12 +1,17 @@
 package com.toyproject.restaurant.service.impl;
 
+import com.toyproject.restaurant.dto.MemberPasswordDto;
 import com.toyproject.restaurant.dto.MemberRequestDto;
 import com.toyproject.restaurant.dto.MemberResponseDto;
+import com.toyproject.restaurant.dto.MemberUsernameDto;
 import com.toyproject.restaurant.entity.Member;
 import com.toyproject.restaurant.entity.domain.Role;
+import com.toyproject.restaurant.exception.PasswordNotMatchException;
 import com.toyproject.restaurant.repository.MemberRepository;
 import com.toyproject.restaurant.service.MemberService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -66,7 +71,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public MemberResponseDto findMember(String username) {
-        Member byUsername = memberRepository.findByUsername(username)
+        Member byUsername = memberRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("username이 존재하지 않습니다."));
 
         MemberResponseDto responseDto = MemberResponseDto.builder()
@@ -74,6 +79,33 @@ public class MemberServiceImpl implements MemberService {
                 .build();
 
         return responseDto;
+    }
+
+    @Override
+    public Long updateMemberUsername(MemberUsernameDto dto) {
+        Member byUsername = memberRepository.findByEmail(dto.getEmail())
+                .orElseThrow(() -> new UsernameNotFoundException("Email 이 존재하지 않습니다."));
+
+        byUsername.updateUsername(dto.getUsername());
+        memberRepository.save(byUsername);
+        return byUsername.getId();
+    }
+
+    @Override
+    public Long updateMemberPassword(MemberPasswordDto dto) {
+        Member byUsername = memberRepository.findByEmail(dto.getEmail())
+                .orElseThrow(() -> new UsernameNotFoundException("Email 이 존재하지 않습니다."));
+
+        boolean matches = passwordEncoder.matches(dto.getPassword(), byUsername.getPassword());
+
+        if (matches) {
+            String encodePassword = passwordEncoder.encode(dto.getChangePassword());
+            byUsername.updatePassword(encodePassword);
+            memberRepository.save(byUsername);
+        } else {
+            throw new PasswordNotMatchException("패스워드가 일치하지 않습니다.");
+        }
+        return byUsername.getId();
     }
 
 }
